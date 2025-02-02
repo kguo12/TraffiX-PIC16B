@@ -2,7 +2,7 @@
 PIC 16B Final Project - Optimizing LA infrastructure and public transportation
 
 ```{python}
-...
+..X
 .X.
 ..O
 ```
