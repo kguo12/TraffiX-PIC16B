@@ -16,21 +16,19 @@ def optimal_walk_route(start, end):
     
     # Make graph of UCLA walking routes
     G = ox.graph.graph_from_point((34.07, -118.445), dist=750, network_type="walk")
-
-    # Find the nearest nodes in the graph
+    
+    # Get the start and end nodes
     start_node = ox.distance.nearest_nodes(G, start[1], start[0])
     end_node = ox.distance.nearest_nodes(G, end[1], end[0])
-
-    # Print starting and ending locations
     print("Start at: Latitude: ", G.nodes[start_node]['y'], "Longitude: ", G.nodes[start_node]['x'])
     print("End at: Latitude: ", G.nodes[end_node]['y'], "Longitude: ", G.nodes[end_node]['x'])
     
-    # Compute the shortest path, get the coordinates
+    # Compute the shortest path, get the coordinates along the path
     shortest_path = nx.shortest_path(G, source=start_node, target=end_node, weight="length")
     path_lats = [G.nodes[node]['y'] for node in shortest_path]
     path_longs = [G.nodes[node]['x'] for node in shortest_path]
     
-    # Plot out an interactive map of the shortest route
+    # Plot out plotly map of the shortest route
     path = go.Scattermapbox(
         lat=path_lats,
         lon=path_longs,
