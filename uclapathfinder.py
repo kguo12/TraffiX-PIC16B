@@ -1,7 +1,6 @@
 import networkx as nx
 import osmnx as ox
-import plotly.graph_objects as go
-import plotly.offline as pyo
+from plotly import express as px
 
 def optimal_walk_route(start, end):
     '''
@@ -29,18 +28,12 @@ def optimal_walk_route(start, end):
     path_longs = [G.nodes[node]['x'] for node in shortest_path]
     
     # Plot out plotly map of the shortest route
-    path = go.Scattermapbox(
-        lat=path_lats,
-        lon=path_longs,
-        mode='lines',
-    )
-    layout = go.Layout(
-        mapbox=dict(
-            style='open-street-map',
-            center=dict(lat=path_lats[len(path_lats)//2], lon=path_longs[len(path_longs)//2]),
-            zoom=20
-        ),
-        margin=dict(l=0, r=0, t=0, b=0)
-    )
-    fig = go.Figure(data=path, layout=layout)
-    pyo.iplot(fig)
+    fig = px.scatter_mapbox(lat = path_lats,
+                        lon = path_longs, 
+                        zoom = 15,
+                        height = 300,
+                        mapbox_style="open-street-map")
+
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    fig.show()
+    
