@@ -18,6 +18,7 @@ def shortest_path(points, start_index, end_index):
     for i in range(len(points)):
         for j in range(i+1, len(points)):
             G.add_edge(i, j, weight = l1_metric(points[1], points[j]))
-    tsp_path = nx.algorithms.approximation.traveling_salesman.traveling_salesman_problem(G, cycle=True)
+    #tsp_path = nx.algorithms.approximation.traveling_salesman.traveling_salesman_problem(G, cycle=False)
+    simple_path = list(nx.shortest_simple_paths(G, start_index, end_index))
 
-    return tsp_path
+    return simple_path
