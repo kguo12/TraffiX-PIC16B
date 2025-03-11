@@ -8,8 +8,15 @@ from tqdm import tqdm
 
 
 def simulate(m, frames=150):
+    # Check if model is compiled
+    try:
+        assert m.sinks, "Your model contains no sink points, or is not compiled. Please compile before simulating."
+    except AttributeError:
+        print("Your model contains no sink points, or is not compiled. Please compile before simulating.")
+        return None
+
     progress_bar = tqdm(total=frames, position=0, leave=True)
-    m = m # instatiate the model
+    m = m # give the model, assumed to be compiled already
     
     # Define update function using model
     
@@ -42,10 +49,13 @@ def simulate(m, frames=150):
 
         road_num_cars = {edge: "" + str(round(m.G[edge[0]][edge[1]]["num_cars"],2)) for edge in m.G.edges}
         nx.draw_networkx_edge_labels(m.G, shift_down_pos, ax=ax, edge_labels=road_num_cars, font_size=15, font_color="black")
+        
     
     # Run animation
     
     fig, ax = plt.subplots(figsize=(20,10))
     ani = FuncAnimation(fig, update, frames=frames, interval=200)
     plt.close()
+
+    
     return HTML(ani.to_jshtml())

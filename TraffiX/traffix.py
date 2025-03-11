@@ -93,10 +93,19 @@ class Map:
         except:
             print("Nodes do not exist.")
             
-    def get_sinks(self):
+        
+    def get_summary(self):
         out_degrees = dict(self.G.out_degree(self.G.nodes))
         sinks = [node for node in out_degrees if out_degrees[node] == 0]
-        print(sinks)
+        print(f"""
+        Resources Used:
+        - Total length of road used: {self.total_length_of_road} units
+        - Total number of lanes: {self.num_lanes}
+        Key Nodes:
+        - Inputs: {self.inputs}
+        - Sinks: {sinks}
+        - Sink destination amounts/Total traffic: {self.cars_to_sinks_dict}
+        """)
             
     # Traffic initialization
     
