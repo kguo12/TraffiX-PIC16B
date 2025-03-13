@@ -208,7 +208,7 @@ class Map:
         # loop through each edge non-simultaneously for each time step ("green light-red light")
         # green_lights = [random.randint(0, len(self.G.edges)-1) for _ in range(self.GLPT)]
         green_lights = [i for i in range(len(self.G.edges))]
-        random.shuffle(green_lights)
+        #random.shuffle(green_lights)
         for green_light in green_lights:
             edge = list(self.G.edges)[green_light]
             inter = edge[1]
