@@ -69,7 +69,7 @@ class Map:
             end_pos = self.node_positions[end]
             pos = start_pos
             direction = np.subtract(end_pos, start_pos)
-            seg_len = 50 # we round the road length according to this
+            seg_len = 10 # we round the road length according to this
             num_segs = round(length / seg_len)
 
             # intermediate intersection positions are purely for visualization purposes
