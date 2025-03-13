@@ -3,6 +3,9 @@
 from traffix import *
 
 def template_2input_1sink():
+    """
+    Returns a simple model for 2 inputs, one with 2 paths to the sink point, one with just one path to the sink point.
+    """
     m = Map(confirmation_messages = False)
     m.add_inter(1, (0,0))
     m.add_inter(2, (1,0))
@@ -19,7 +22,10 @@ def template_2input_1sink():
     m.simulation_check_compile()
     return m
 
-def template_bridge(num_bridge_lanes = 1):
+def template_bridge(num_bridge_lanes = 1, speed_limit=50):
+    """
+    Returns a simple bridge model, allowing for variation in the number of lanes on the bridge.
+    """
     assert num_bridge_lanes >= 1, "num_bridge_lanes must be greater than 1"
     assert type(num_bridge_lanes) == int, "Please enter an integer"
     m = Map(green_lights_per_time = 5, confirmation_messages = False)
@@ -40,30 +46,30 @@ def template_bridge(num_bridge_lanes = 1):
     m.add_inter('ralphs1', (6,2))
     m.add_inter('ralphs2', (6,1))
     m.add_inter('ralphs3', (6,0))
-    m.add_road(1, 2, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(2, 3, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(1, 4, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(2, 5, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(3, 6, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(5, 4, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(6, 5, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(4, 'bridge1', dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(5, 'bridge1', dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(6, 'bridge1', dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road('bridge1', 'bridge2', dt=1, speed_limit=50, length=100, lanes=num_bridge_lanes, num_cars=0)
-    m.add_road('bridge2', 7, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road('bridge2', 8, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road('bridge2', 9, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(7, 8, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(8, 9, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(7, 10, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(8, 11, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(9, 12, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(12, 11, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(11, 10, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(10, 'ralphs1', dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(11, 'ralphs2', dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
-    m.add_road(12, 'ralphs3', dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
+    m.add_road(1, 2, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(2, 3, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(1, 4, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(2, 5, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(3, 6, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(5, 4, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(6, 5, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(4, 'bridge1', dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(5, 'bridge1', dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(6, 'bridge1', dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road('bridge1', 'bridge2', dt=1, speed_limit=speed_limit, length=100, lanes=num_bridge_lanes, num_cars=0)
+    m.add_road('bridge2', 7, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road('bridge2', 8, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road('bridge2', 9, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(7, 8, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(8, 9, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(7, 10, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(8, 11, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(9, 12, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(12, 11, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(11, 10, dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(10, 'ralphs1', dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(11, 'ralphs2', dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
+    m.add_road(12, 'ralphs3', dt=1, speed_limit=speed_limit, length=100, lanes=1, num_cars=0)
     m.declare_inflow_node(1, {'ralphs1': 40, 'ralphs2': 40, 'ralphs3': 40})
     m.declare_inflow_node(2, {'ralphs1': 40, 'ralphs2': 40, 'ralphs3': 40})
     m.declare_inflow_node(3, {'ralphs1': 40, 'ralphs2': 40, 'ralphs3': 40})

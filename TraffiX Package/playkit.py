@@ -3,6 +3,9 @@
 from traffix import *
 
 def template_2input_1sink():
+    """
+    Returns a simple model for 2 inputs, one with 2 paths to the sink point, one with just one path to the sink point.
+    """
     m = Map(confirmation_messages = False)
     m.add_inter(1, (0,0))
     m.add_inter(2, (1,0))
@@ -20,6 +23,9 @@ def template_2input_1sink():
     return m
 
 def template_bridge(num_bridge_lanes = 1, speed_limit=50):
+    """
+    Returns a simple bridge model, allowing for variation in the number of lanes on the bridge.
+    """
     assert num_bridge_lanes >= 1, "num_bridge_lanes must be greater than 1"
     assert type(num_bridge_lanes) == int, "Please enter an integer"
     m = Map(green_lights_per_time = 5, confirmation_messages = False)

@@ -8,6 +8,10 @@ from tqdm import tqdm
 
 
 def simulate(m, frames=150):
+    """
+    Performs a simulation for a given model (m) across a number of frames.
+    Returns: HTML matplotlib animation of traffic simulation, coloring roads by num_cars.
+    """
     progress_bar = tqdm(total=frames, position=0, leave=True)
     m = m # instatiate the model
     

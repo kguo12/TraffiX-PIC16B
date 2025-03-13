@@ -9,19 +9,30 @@ import networkx as nx
 from tqdm import tqdm
 
 def weighting(data):
+    """
+    Simple weighting by proportion of total.
+    """
     return data / data.sum()
 
 def inv_weighting(data):
+    """
+    Inverse weighting, giving higher weight to lower values.
+    """
     return (1/data) / (1/data).sum()
 
 def add_dicts(dict1, dict2):
+    """
+    Adding dictionary values by key.
+    """
     result = dict1.copy()
     for key, value in dict2.items():
         result[key] = result.get(key, 0) + value
     return result
 
 class Map:
-    
+    """
+    Road network class.
+    """
     # Initialization methods
     
     def __init__(self, capacity_per_length_per_lane = .5, 
@@ -29,6 +40,22 @@ class Map:
                  ideal_send_per_lane_per_green = 10,
                  confirmation_messages = True, 
                  seg_len = 20):
+        """
+        Parameters:
+        capacity_per_length_per_lane: specifies how capacity for each road segment should be calculated. This constant is multiplied by lanes and length.
+        green_lights_per_time: OUTDATED, used to determine the number of green lights for each time step.
+        ideal_send_per_lane_per_green: this controls the maximum number of cars a given lane for a road will send into an intersection. It is reduced
+        by speed_factor (see below).
+        confirmation_messages: default to True, allows messages when calling add_road, add_inter, simulation_check_compile, etc.
+        seg_len: specifies the length each road initialization should be split up by into segments.
+        
+        G: the graph.
+        node_positions: the positions of the nodes when visualizing with matplotlib.
+        num_lanes: the total number of lanes in the network.
+        total_length_of_road: the total length of road used in the network.
+        inputs: the nodes declared as inputs with .declare_inflow_node.
+        cars_to_sinks_dict: the initial traffic count in the simulation, and the destination sink points for all cars.
+        """
         self.G = nx.DiGraph()
         self.node_positions = {}
         self.capacityPLPL = capacity_per_length_per_lane
@@ -64,7 +91,7 @@ class Map:
         
     def add_road(self, start, end, dt, speed_limit, length, lanes, num_cars = 0):
         """
-        Adds a road from node labels
+        Adds a road from node labels.
         """
         try:
             start_pos = self.node_positions[start]
@@ -97,6 +124,9 @@ class Map:
             
         
     def get_summary(self):
+        """
+        Does not modify network. Returns summary statistics of the road network before or after compilation.
+        """
         out_degrees = dict(self.G.out_degree(self.G.nodes))
         sinks = [node for node in out_degrees if out_degrees[node] == 0]
         print(f"""
@@ -112,7 +142,9 @@ class Map:
     # Traffic initialization
     
     def declare_inflow_node(self, source_node, initial_cars_to_sinks):
-        
+        """
+        Takes an input node and assigns it some initial number of cars and their sink destinations.
+        """
         mod_initial_cars_to_sinks = {(source_node, sink): initial_cars_to_sinks[sink] for sink in initial_cars_to_sinks}
         self.cars_to_sinks_dict = add_dicts(self.cars_to_sinks_dict, mod_initial_cars_to_sinks)
         initial_cars = 0
@@ -143,6 +175,13 @@ class Map:
     # Check and Compilation for simulation
     
     def simulation_check_compile(self):
+        """
+        Checks if the road network is suitable for simulation
+        - Directed and acyclic?
+        - Calculate intersection turn probabilities
+        - instantiate self.sinks
+        Returns summary messages and a sketch of the graph.
+        """
         # Check for acyclic
         assert nx.is_directed_acyclic_graph(self.G), "Constructed road network is not acyclic. Please try again."
         
@@ -207,6 +246,12 @@ class Map:
     # Simulation, time-step update for road network
     
     def update_time(self):
+        """
+        Moves the simulation forward one time-step. This involves
+        1. Randomizing the order of the green lights
+        2. Calculating speed_factors and num_cars to send for each edge
+        3. Updating num_cars for each edge after each send into intersection
+        """
         # loop through each edge non-simultaneously for each time step ("green light-red light")
         # green_lights = [random.randint(0, len(self.G.edges)-1) for _ in range(self.GLPT)]
         green_lights = [i for i in range(len(self.G.edges))]
