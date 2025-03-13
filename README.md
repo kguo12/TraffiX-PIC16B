@@ -1,8 +1,8 @@
-# LA-Transport-PIC16B
-PIC 16B Final Project - Optimizing LA infrastructure and public transportation
+# TraffiX (1.0)
+## By Mario Truong, Henry Tang, and [Kenny Guo](https://kguo12.github.io/kennyguowebpage/)
 
-```{python}
-O.X
-.X.
-XOO
-```
+*Final Project for UCLA PIC 16B (25W, S. Burnett).*
+
+This is TraffiX, a Python package for building and simulating artificial or real-life traffic networks utilizing NetworkX and OSMNX capabilities. You may download the package **TraffiX Package** above. 
+
+(insert description and writeup here)
