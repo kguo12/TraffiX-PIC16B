@@ -27,12 +27,14 @@ class Map:
     def __init__(self, capacity_per_length_per_lane = .5, 
                  green_lights_per_time = 3, 
                  ideal_send_per_lane_per_green = 10,
-                 confirmation_messages = True):
+                 confirmation_messages = True, 
+                 seg_len = 20):
         self.G = nx.DiGraph()
         self.node_positions = {}
         self.capacityPLPL = capacity_per_length_per_lane
         self.idealSPLPG = ideal_send_per_lane_per_green
         self.GLPT = green_lights_per_time
+        self.seg_len = seg_len
         
         self.confirmation = confirmation_messages
         if self.confirmation:
@@ -69,8 +71,8 @@ class Map:
             end_pos = self.node_positions[end]
             pos = start_pos
             direction = np.subtract(end_pos, start_pos)
-            seg_len = 10 # we round the road length according to this
-            num_segs = round(length / seg_len)
+            # we round the road length according to the seg_len
+            num_segs = round(length / self.seg_len)
 
             # intermediate intersection positions are purely for visualization purposes
             last_inter = start
@@ -79,11 +81,11 @@ class Map:
                 next_inter = "(" + str(start) + "," + str(end) + ")" + " S" + str(i) # (u,v) S0
                 self.add_inter(next_inter, tuple(pos)) 
                 
-                self.G.add_edge(last_inter, next_inter, dt=dt, capacity=self.capacityPLPL*seg_len*lanes, speed_limit=speed_limit, length=seg_len, lanes=lanes, num_cars=num_cars)
+                self.G.add_edge(last_inter, next_inter, dt=dt, capacity=self.capacityPLPL*self.seg_len*lanes, speed_limit=speed_limit, length=self.seg_len, lanes=lanes, num_cars=num_cars)
                 last_inter = next_inter
                 
             
-            self.G.add_edge(last_inter, end, dt=dt, capacity=self.capacityPLPL*seg_len*lanes, speed_limit=speed_limit, length=seg_len, lanes=lanes, num_cars=num_cars)
+            self.G.add_edge(last_inter, end, dt=dt, capacity=self.capacityPLPL*self.seg_len*lanes, speed_limit=speed_limit, length=self.seg_len, lanes=lanes, num_cars=num_cars)
             self.total_length_of_road += lanes*length
             self.num_lanes += lanes
 

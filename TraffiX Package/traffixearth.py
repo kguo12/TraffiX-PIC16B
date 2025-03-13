@@ -51,7 +51,7 @@ def irl_to_traffix_model(coordinates, radius):
     edges['lanes'] = edges['lanes'].astype(int)
     
     # Instantiation of TraffiX model
-    model = Map(confirmation_messages = False)
+    model = Map(confirmation_messages = False, seg_len=radius/10)
     
     for node_row in range(len(nodes)):
         name = nodes.loc[node_row, 'osmid']
