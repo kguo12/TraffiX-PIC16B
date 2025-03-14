@@ -32,11 +32,16 @@ def simulate(m, frames=150):
         num_cars_values = list(num_cars.values())
         norm = plt.Normalize(0, 10)  # Normalize to [0,25]
         edge_colors = [cm.Reds(norm(num_cars[edge])) for edge in m.G.edges]
+        
+        # Update edge widths for number of lanes
+        num_lanes = nx.get_edge_attributes(m.G, 'lanes')
+        norm = plt.Normalize(0, 1)
+        edge_widths = [norm(num_lanes[edge])**2 + 7 for edge in m.G.edges]
 
         # Redraw graph
         nx.draw(m.G, m.node_positions, ax=ax, with_labels=False, 
                 node_color=node_colors, node_size=0, 
-                edge_color=edge_colors, width=7)
+                edge_color=edge_colors, width=edge_widths)
 
         # Create labels for terminations, num_cars
         shift_down_pos = {node: (x, y - 0.05) for node, (x, y) in m.node_positions.items()}
