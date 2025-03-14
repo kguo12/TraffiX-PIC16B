@@ -39,7 +39,9 @@ class Map:
                  green_lights_per_time = 3, 
                  ideal_send_per_lane_per_green = 10,
                  confirmation_messages = True, 
-                 seg_len = 20):
+                 seg_len = 20, 
+                 dt=1, 
+                 flow_constant = 5): # should we add flow hesitancy/intertia
         """
         Parameters:
         capacity_per_length_per_lane: specifies how capacity for each road segment should be calculated. This constant is multiplied by lanes and length.
@@ -62,13 +64,15 @@ class Map:
         self.idealSPLPG = ideal_send_per_lane_per_green
         self.GLPT = green_lights_per_time
         self.seg_len = seg_len
+        self.dt = dt
+        self.flow_constant = flow_constant
         
         self.confirmation = confirmation_messages
         if self.confirmation:
             print("""
             Road network initialized. Methods: \n
             - .add_inter(label, pos)
-            - .add_road(start, end, dt, speed_limit, lanes, num_cars = 0)
+            - .add_road(start, end, speed_limit, lanes, num_cars = 0)
             - .simulation_status_check()
             """)
         
@@ -89,7 +93,7 @@ class Map:
         if self.confirmation:
             print(f"Intersection {label} added.")
         
-    def add_road(self, start, end, dt, speed_limit, length, lanes, num_cars = 0):
+    def add_road(self, start, end, speed_limit, length, lanes, num_cars = 0):
         """
         Adds a road from node labels.
         """
@@ -108,11 +112,11 @@ class Map:
                 next_inter = "(" + str(start) + "," + str(end) + ")" + " S" + str(i) # (u,v) S0
                 self.add_inter(next_inter, tuple(pos)) 
                 
-                self.G.add_edge(last_inter, next_inter, dt=dt, capacity=self.capacityPLPL*self.seg_len*lanes, speed_limit=speed_limit, length=self.seg_len, lanes=lanes, num_cars=num_cars)
+                self.G.add_edge(last_inter, next_inter, capacity=self.capacityPLPL*self.seg_len*lanes, speed_limit=speed_limit, length=self.seg_len, lanes=lanes, num_cars=num_cars)
                 last_inter = next_inter
                 
             
-            self.G.add_edge(last_inter, end, dt=dt, capacity=self.capacityPLPL*self.seg_len*lanes, speed_limit=speed_limit, length=self.seg_len, lanes=lanes, num_cars=num_cars)
+            self.G.add_edge(last_inter, end, capacity=self.capacityPLPL*self.seg_len*lanes, speed_limit=speed_limit, length=self.seg_len, lanes=lanes, num_cars=num_cars)
             self.total_length_of_road += lanes*length
             self.num_lanes += lanes
 
@@ -156,15 +160,15 @@ class Map:
         self.G.add_node(input_name)
         self.input_temp_nodes.append(input_name)
         self.node_positions[input_name] = (self.node_positions[source_node][0] - 0.1, self.node_positions[source_node][1])
-        self.add_road_segment(input_name, source_node, dt=1, speed_limit=50, length=100, lanes=1, num_cars=initial_cars)
+        self.add_road_segment(input_name, source_node, speed_limit=50, length=100, lanes=1, num_cars=initial_cars)
         self.num_lanes -= 1
         self.total_length_of_road -= 100
         if self.confirmation:
             print("Inflow node declared.")
 
-    def add_road_segment(self, start, end, dt, speed_limit, length, lanes, num_cars = 0):
+    def add_road_segment(self, start, end, speed_limit, length, lanes, num_cars = 0):
         try:
-            self.G.add_edge(start, end, dt=dt, capacity=self.capacityPLPL*length*lanes, speed_limit=speed_limit, length=length, lanes=lanes, num_cars=num_cars)
+            self.G.add_edge(start, end, capacity=self.capacityPLPL*length*lanes, speed_limit=speed_limit, length=length, lanes=lanes, num_cars=num_cars)
             if self.confirmation:
                 print(f"Road with {lanes} lanes between {start} and {end} added.")
             self.num_lanes += lanes
@@ -262,6 +266,7 @@ class Map:
             out_edges = list(self.G.out_edges(inter))
 
             # handle case leading to sink
+            """
             if len(out_edges) == 0:
                 speed_factor = max(self.G[edge[0]][edge[1]]['capacity'] - self.G[edge[0]][edge[1]]['num_cars'],0) / self.G[edge[0]][edge[1]]['capacity'] + 0.2
                 #print(speed_factor)
@@ -272,16 +277,47 @@ class Map:
                 self.G.nodes[inter]['terminations'] += to_send_num
                 self.G[edge[0]][edge[1]]['num_cars'] -= to_send_num
                 pass
+            """
 
             to_send = {out_edge: self.G.nodes[inter][out_edge] for out_edge in out_edges}
             # between r>0 and 1, note that r attains smaller positive value iff road capacity is large (i.e. a huge jammed multi-lane highway vs. local road)
-            speed_factor = max(self.G[edge[0]][edge[1]]['capacity'] - self.G[edge[0]][edge[1]]['num_cars'],0) / self.G[edge[0]][edge[1]]['capacity'] + 0.2
-            # send calculated amount, or remaining cars in road
-            to_send_num = min(self.idealSPLPG * self.G[edge[0]][edge[1]]['lanes'] * speed_factor, self.G[edge[0]][edge[1]]['num_cars'])
-            if to_send_num == 0:
-                pass
+
+            # the max possible that can be sent without overflow
+            fluxes = [(self.G[out_edge[0]][out_edge[1]]['capacity'] - self.G[out_edge[0]][out_edge[1]]['num_cars'])/to_send[out_edge] for out_edge in out_edges]
+            fluxes = np.array(fluxes)
+            try:
+                out_flux_cap = float(np.min(fluxes))
+                ### Is this how the system works 
+                
+                # take into account speed
+                max_out_flux = min(out_flux_cap,  self.G[edge[0]][edge[1]]['num_cars'] * self.dt * self.flow_constant / self.G[edge[0]][edge[1]]['length']) 
+                # take into account lanes????
+                to_send_num = min(max_out_flux, self.G[edge[0]][edge[1]]['num_cars'])
+
+
+
+                #speed_factor = max(self.G[edge[0]][edge[1]]['capacity'] - self.G[edge[0]][edge[1]]['num_cars'],0) / self.G[edge[0]][edge[1]]['capacity'] + 0.2 # old version
+                # send calculated amount, or remaining cars in road
+                #to_send_num = min(self.idealSPLPG * self.G[edge[0]][edge[1]]['lanes'] * speed_factor, self.G[edge[0]][edge[1]]['num_cars']) # old version
+                
+            except ValueError: # if it is a sink, min will be empty
+                speed_factor = max(self.G[edge[0]][edge[1]]['capacity'] - self.G[edge[0]][edge[1]]['num_cars'],0) / self.G[edge[0]][edge[1]]['capacity'] + 0.2
+                #print(speed_factor)
+                # send calculated amount, or remaining cars in road
+                to_send_num = min(self.idealSPLPG * self.G[edge[0]][edge[1]]['lanes'] * speed_factor, self.G[edge[0]][edge[1]]['num_cars'])
+                if to_send_num == 0:
+                    pass
+                self.G.nodes[inter]['terminations'] += to_send_num
+                self.G[edge[0]][edge[1]]['num_cars'] -= to_send_num
+
 
             # Send cars, check for capacity, retain if overflow, remove cars from edge
+
+            for out_edge in to_send:
+                num_send = to_send[out_edge] * to_send_num
+                self.G[edge[0]][edge[1]]['num_cars'] -= num_send
+                self.G[out_edge[0]][out_edge[1]]['num_cars'] += num_send
+            """
             for out_edge in to_send:
                 num_send = to_send[out_edge] * to_send_num
                 would_be_capacity = num_send + self.G[out_edge[0]][out_edge[1]]['num_cars']
@@ -291,8 +327,9 @@ class Map:
                     self.G[out_edge[0]][out_edge[1]]['num_cars'] = self.G[out_edge[0]][out_edge[1]]['capacity']
                 else:
                     self.G[edge[0]][edge[1]]['num_cars'] -= num_send
-                    self.G[out_edge[0]][out_edge[1]]['num_cars'] += num_send
-
+                    self.G[out_edge[0]][out_edge[1]]['num_cars'] += num_send"
+            """
+            # I don't think I need this
 
 
 

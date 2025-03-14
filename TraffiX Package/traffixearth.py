@@ -58,7 +58,7 @@ def irl_to_traffix_model(coordinates, radius):
         position = (nodes.loc[node_row, 'xpos'], nodes.loc[node_row, 'ypos'])
         model.add_inter(label=name, pos=position)
         
-    #m.add_road(1, 2, dt=1, speed_limit=50, length=100, lanes=1, num_cars=0)
+    #m.add_road(1, 2, speed_limit=50, length=100, lanes=1, num_cars=0)
     for edge_row in range(len(edges)):
         start = edges.loc[edge_row, 'u']
         end = edges.loc[edge_row, 'v']
@@ -67,7 +67,7 @@ def irl_to_traffix_model(coordinates, radius):
         # really, this model makes a lot of gross assumptions, so this comparatively isn't too gross.
         length = edges.loc[edge_row, 'length']
         lanes = edges.loc[edge_row, 'lanes']
-        model.add_road(start, end, dt=1, speed_limit=speed_limit, length=length, lanes=lanes, num_cars=0)
+        model.add_road(start, end, speed_limit=speed_limit, length=length, lanes=lanes, num_cars=0)
     
     print(f"""
     Uncompiled model of IRL road network at {coordinates} with radius {radius} returned.
