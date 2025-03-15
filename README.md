@@ -1,5 +1,5 @@
 # TraffiX (1.0)
-## By Mario Truong, Henry Tang, and [Kenny Guo](https://kguo12.github.io/kennyguowebpage/)
+## By [Mario Truong](https://mariotruong27.github.io/16blog/), [Henry Tang](https://tanghenry63.github.io/pic16b/), and [Kenny Guo](https://kguo12.github.io/kennyguowebpage/)
 
 *Final Project for UCLA PIC 16B (25W, S. Burnett).*
 
